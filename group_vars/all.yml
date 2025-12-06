@@ -1,0 +1,5 @@
+---
+# Central rsyslog server (control node in the lab)
+logserver_ip: 192.168.56.100
+logserver_port: 514
+logserver_protocol: udp
