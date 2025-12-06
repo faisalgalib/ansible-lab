@@ -1,0 +1,15 @@
+---
+- name: Test only the MOTD task
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Set login MOTD banner
+      copy:
+        dest: /etc/motd
+        content: |
+          *********************************************
+          Managed by Ansible (MOTD Test Playbook)
+          Host: {{ inventory_hostname }}
+          *********************************************
+        mode: '0644'

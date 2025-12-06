@@ -1,0 +1,27 @@
+---
+- name: Ensure baseline user exists
+  ansible.builtin.user:
+    name: devops
+    state: present
+    groups: wheel
+    append: true
+
+- name: Install common tools
+  ansible.builtin.package:
+    name:
+    - vim
+    - git
+    - curl
+    - wget
+    - tree
+    state: present
+
+- name: Set login MOTD banner
+  ansible.builtin.copy:
+    dest: /etc/motd
+    content: |
+      *********************************************
+      Managed by Ansible (Baseline Role)
+      Host: {{ inventory_hostname }}
+      *********************************************
+    mode: "0644"

@@ -1,0 +1,88 @@
+---
+- name: Configure rsyslog server on control01
+  hosts: logserver
+  become: yes
+
+  vars:
+    rsyslog_remote_dir: /var/log/remote
+
+  tasks:
+    - name: Ensure rsyslog is installed
+      package:
+        name: rsyslog
+        state: present
+
+    - name: Create directory for remote logs
+      file:
+        path: "{{ rsyslog_remote_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Enable UDP/TCP reception in rsyslog
+      copy:
+        dest: /etc/rsyslog.d/10-server.conf
+        content: |
+          # Listen on UDP 514
+          module(load="imudp")
+          input(type="imudp" port="514")
+
+          # Listen on TCP 514
+          module(load="imtcp")
+          input(type="imtcp" port="514")
+
+          # Store remote logs under /var/log/remote/HOSTNAME/messages
+          template(name="RemoteLogs" type="string"
+                   string="{{ rsyslog_remote_dir }}/%HOSTNAME%/messages")
+
+          *.*  ?RemoteLogs
+          & stop
+        mode: '0644'
+
+    - name: Open firewall ports for rsyslog (UDP/TCP 514)
+      ansible.builtin.command: >
+        firewall-cmd --add-port=514/udp --add-port=514/tcp --permanent
+      register: fw_cmd
+      failed_when: fw_cmd.rc not in [0, 252]    # 252 = firewalld not running
+      changed_when: fw_cmd.rc == 0
+
+    - name: Reload firewall if running
+      ansible.builtin.command: firewall-cmd --reload
+      register: fw_reload
+      failed_when: fw_reload.rc not in [0, 252]
+      changed_when: fw_reload.rc == 0
+
+    - name: Ensure rsyslog is enabled and restarted
+      service:
+        name: rsyslog
+        state: restarted
+        enabled: yes
+
+
+- name: Configure rsyslog clients on nodes
+  hosts: logclients
+  become: yes
+
+  vars:
+    logserver_ip: 192.168.56.100   # control01 lab IP
+
+  tasks:
+    - name: Ensure rsyslog is installed
+      package:
+        name: rsyslog
+        state: present
+
+    - name: Send all logs to central rsyslog server
+      copy:
+        dest: /etc/rsyslog.d/10-client.conf
+        content: |
+          # Send all logs to central log server
+          *.* @@{{ logserver_ip }}:514
+        mode: '0644'
+
+    - name: Ensure rsyslog is enabled and restarted
+      service:
+        name: rsyslog
+        state: restarted
+        enabled: yes

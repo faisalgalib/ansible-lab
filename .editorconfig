@@ -1,0 +1,28 @@
+# Top-level EditorConfig file
+root = true
+
+# Global settings
+[*]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# YAML (Ansible tasks, playbooks, vars, group_vars, host_vars)
+[*.yml]
+indent_style = space
+indent_size = 2
+
+[*.yaml]
+indent_style = space
+indent_size = 2
+
+# Jinja2 templates (Ansible config files)
+[*.j2]
+indent_style = space
+indent_size = 2
+
+# Ansible inventory files
+[hosts]
+indent_style = space
+indent_size = 2

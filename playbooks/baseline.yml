@@ -1,0 +1,8 @@
+---
+- name: Apply baseline and logging roles to all nodes
+  hosts: all
+  become: true
+
+  roles:
+  - role: baseline
+  - role: rsyslog_client

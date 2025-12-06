@@ -1,0 +1,31 @@
+# Ansible sensitive files
+*.retry
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore SSH keys
+*.pem
+*.key
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# VS Code
+.vscode/
+
+# Local variables
+.env
+
+# Backup files
+*~
+*.swp
+
+# Logs
+*.log
+
+# Ansible vault
+*.vault
+*.vault.yml

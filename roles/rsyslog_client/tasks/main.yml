@@ -1,0 +1,19 @@
+---
+- name: Ensure rsyslog is installed
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
+- name: Deploy rsyslog client config
+  ansible.builtin.template:
+    src: client.conf.j2
+    dest: /etc/rsyslog.d/99-client.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure rsyslog is enabled and running
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
+    enabled: true

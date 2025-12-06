@@ -1,0 +1,22 @@
+---
+- name: Baseline for all servers
+  hosts: all
+  become: yes
+  roles:
+    - baseline
+
+- name: Configure rsyslog server
+  hosts: logserver
+  become: yes
+  vars:
+    rsyslog_remote_dir: /var/log/remote
+  roles:
+    - rsyslog_server
+
+- name: Configure rsyslog clients
+  hosts: logclients
+  become: yes
+  vars:
+    logserver_ip: 192.168.56.100    # control01 lab IP
+  roles:
+    - rsyslog_client

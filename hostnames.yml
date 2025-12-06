@@ -1,0 +1,9 @@
+---
+- name: Set proper hostnames for all servers
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Set hostname based on inventory name
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"

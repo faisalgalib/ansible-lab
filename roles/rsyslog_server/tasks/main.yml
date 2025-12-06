@@ -1,0 +1,38 @@
+---
+- name: Ensure rsyslog is installed
+  package:
+    name: rsyslog
+    state: present
+
+- name: Create directory for remote logs
+  file:
+    path: "{{ rsyslog_remote_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy rsyslog server config
+  template:
+    src: server.conf.j2
+    dest: /etc/rsyslog.d/10-server.conf
+    mode: '0644'
+
+- name: Open firewall ports for rsyslog (UDP/TCP 514)
+  command: >
+    firewall-cmd --add-port=514/udp --add-port=514/tcp --permanent
+  register: fw_cmd
+  failed_when: fw_cmd.rc not in [0, 252]
+  changed_when: fw_cmd.rc == 0
+
+- name: Reload firewall if running
+  command: firewall-cmd --reload
+  register: fw_reload
+  failed_when: fw_reload.rc not in [0, 252]
+  changed_when: fw_reload.rc == 0
+
+- name: Ensure rsyslog is enabled and restarted
+  service:
+    name: rsyslog
+    state: restarted
+    enabled: yes
